@@ -59,9 +59,10 @@ jobs:
           pushd ${{steps.download.outputs.download-path}}
           for item in ./*; do \
             if [ -d "$item" ]; then \
-              cat "$item"/*.json | jq -s 'map({(.name|tostring): .}) | add' | tee jobs.json; \
+              cat "$item"/*.json | tee -a tmp.json; \
             fi \
           done
+          cat tmp.json | jq -s 'map({(.name|tostring): .}) | add' | tee jobs.json
           popd
           pushd site
           mkdir data; mv ${{ steps.download.outputs.download-path }}/jobs.json data/
