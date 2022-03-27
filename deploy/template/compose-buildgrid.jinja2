@@ -1,0 +1,50 @@
+# The contents of this file are covered by APACHE License Version 2.
+# Modifications were made to this file for remote-apis-testing compatability
+
+version: '3.4'
+services:
+  frontend:
+    command:
+    - server
+    - start
+    - -vvv
+    - /config/server.config
+    image: registry.gitlab.com/buildgrid/buildgrid/buildgrid:{{BUILDGRID_VERSION_HASH}} #{{BUILDGRID_VERSION}}
+    restart: on-failure
+    ports:
+    - 8980:8980
+    volumes:
+    - ./config/buildgrid_config:/config
+    depends_on:
+    - database
+  
+  database:
+    image: postgres:9.6.18
+    environment:
+      POSTGRES_USER: bgd
+      POSTGRES_PASSWORD: insecure
+      POSTGRES_DB: bgd
+    ports:
+      - "5432:5432"
+
+  worker:
+    build:
+      context: docker
+      target: buildbox
+      args:
+        BUILDBOX_COMMON_VERSION: {{BUILDBOX_COMMON_VERSION}}
+        BUILDBOX_WORKER_VERSION: {{BUILDBOX_WORKER_VERSION}}
+        BUILDBOX_HOST_TOOLS_SHA: {{BUILDBOX_HOST_TOOLS_SHA}}
+    image: buildbox:latest
+    restart: on-failure
+    command:
+    - --buildbox-run=/usr/local/bin/buildbox-run-hosttools
+    - --bots-remote=http://frontend:8980
+    - --cas-remote=http://frontend:8980
+    - --instance=remote-execution
+    - --request-timeout=30 
+    - --runner-arg=--disable-localcas
+    - --platform
+    - OSFamily=linux
+    depends_on:
+    - frontend

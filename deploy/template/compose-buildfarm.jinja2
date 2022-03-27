@@ -1,0 +1,32 @@
+version: '3.4'
+services:
+  frontend:
+    build:
+      context: docker
+      target: buildfarm
+      args:
+        BUILDFARM_VERSION: {{BUILDFARM_VERSION}}
+        BAZEL_VERSION: {{BUILDFARM_BAZEL_VERSION}} # Version of Bazel required to build Buildfarm
+        BUILDFARM_DAEMON: buildfarm-server
+        BUILDFARM_CONFIG: /config/server.config
+    image: buildfarm_server:latest
+    ports:
+    - 8980:8980
+    volumes:
+    - ./config/buildfarm_config:/config
+  
+  worker:
+    build:
+      context: docker
+      target: buildfarm
+      args:
+        BUILDFARM_VERSION: {{BUILDFARM_VERSION}}
+        BAZEL_VERSION: {{BUILDFARM_BAZEL_VERSION}} # Version of Bazel required to build Buildfarm
+        BUILDFARM_DAEMON: buildfarm-operationqueue-worker
+        BUILDFARM_CONFIG: /config/worker.config
+    image: buildfarm_worker:latest
+    volumes:
+    - ./config/buildfarm_config:/config
+    - ./worker:/tmp/worker
+    depends_on:
+    - frontend

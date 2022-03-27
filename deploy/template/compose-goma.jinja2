@@ -1,0 +1,48 @@
+version: '3.4'
+services:
+  client:
+    build:
+      context: docker
+      target: goma_client
+      args:
+        GOMA_CLIENT_GIT_SHA: {{GOMA_CLIENT_GIT_SHA}}
+    image: goma-client:latest
+    environment: 
+    - GOMA_ARBITRARY_TOOLCHAIN_SUPPORT=true
+    - GOMA_USE_LOCAL=false
+    - GOMA_FALLBACK=false
+    - GOMA_USE_SSL=false
+    - GOMACTL_SKIP_AUTH=true
+    - GOMA_SERVER_HOST=server
+    - GOMA_SERVER_PORT=5050
+    - CC=/goma/gomacc gcc
+    command: >
+      sh -c
+      "/goma/goma_ctl.py ensure_start &&
+      git clone --branch v1.1.0 https://github.com/tlsa/libcyaml.git &&
+      cd libcyaml &&
+      make && make test"
+    depends_on: 
+    - server
+
+  server:
+    build:
+      context: docker
+      target: goma_server
+      args:
+        GOMA_SERVER_VERSION: {{GOMA_SERVER_VERSION}}
+        APPLY_GOMA_SERVER_PATCHES: "true"
+    image: goma-server:latest
+    command: >
+      -exec-config-file platform 
+      -allowed-users "*@client"  
+      -remoteexec-addr frontend:8980 
+      -port 5050 
+      -remote-instance-name "remote-execution" 
+      -insecure-serveraccess 
+      -insecure-remoteexec 
+      -insecure-skip-verify
+    ports:
+    - 5050:5050
+    volumes:
+    - ./config/goma_config/platform:/platform

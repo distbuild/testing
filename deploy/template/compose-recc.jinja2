@@ -1,0 +1,22 @@
+version: '3.4'
+services:
+  client:
+    build:
+      context: docker
+      target: recc
+      args:  
+        RECC_VERSION: {{RECC_VERSION}}
+        BUILDBOX_COMMON_VERSION: {{BUILDBOX_COMMON_VERSION}}
+        BUILDBOX_WORKER_VERSION: {{BUILDBOX_WORKER_VERSION}}
+        BUILDBOX_HOST_TOOLS_SHA: {{BUILDBOX_HOST_TOOLS_SHA}}
+    image: recc:latest 
+    environment: 
+    - RECC_SERVER=frontend:8980
+    - RECC_INSTANCE=remote-execution
+    - RECC_REMOTE_PLATFORM_OSFamily=linux
+    - CC=/recc/build/bin/recc /usr/bin/gcc 
+    command: >
+      sh -c
+        "git clone --branch v1.1.0 https://github.com/tlsa/libcyaml.git &&
+        cd libcyaml &&
+        make && make test"

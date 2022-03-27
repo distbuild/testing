@@ -1,0 +1,23 @@
+name: gh-pages
+
+on:
+  push:
+    branches:
+      - gh-pages
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install
+        uses: benjlevesque/short-sha@v1.2
+        id: short-sha
+        with:
+          length: 6
+      - name: Setup
+        env:
+          HUGO_PARAMS_commit_hash: ${{ steps.short-sha.outputs.sha }}
+          HUGO_PARAMS_commit_url: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          HUGO_PARAMS_pipeline_id: ${{ github.run_id }}
+          HUGO_PARAMS_pipeline_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

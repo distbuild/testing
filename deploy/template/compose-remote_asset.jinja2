@@ -1,0 +1,10 @@
+version: '3.4'
+services:
+  asset:
+      image: buildbarn/bb-remote-asset:{{REMOTE_ASSET_VERSION}}
+      command: /remote_asset_config/asset.jsonnet
+      ports:
+      - "8979:8979"
+      volumes:
+      - "./storage-asset:/storage"
+      - "./config/remote_asset_config:/remote_asset_config"

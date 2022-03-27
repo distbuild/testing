@@ -1,0 +1,76 @@
+name: main
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        client: [ bazel ]
+        server: [ buildbarn ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 1
+      - name: Deploy
+        run: |
+          mkdir results
+          pushd deploy
+          pip install -Ur requirements.txt
+          ./run.sh -g -s compose-${{ matrix.server }}.yml -c compose-${{ matrix.client }}.yml -d ${{ matrix.server }}+${{ matrix.client }} \
+            -u ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} > ../results/${{ matrix.server }}+${{ matrix.client }}.json
+          popd
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.server }}+${{ matrix.client }}.json
+          path: results/${{ matrix.server }}+${{ matrix.client }}.json
+  build:
+    name: Build
+    needs: deploy
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 1
+      - name: Download
+        uses: actions/download-artifact@v3
+        id: download
+        with:
+          path: results
+      - name: Install
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
+      - name: Build
+        run: |
+          sudo apt update && sudo apt install -y jq
+          pushd ${{steps.download.outputs.download-path}}
+          for item in ./*; do \
+            if [ -d "$item" ]; then \
+              cat "$item"/*.json | jq -s 'map({(.name|tostring): .}) | add' | tee jobs.json; \
+            fi \
+          done
+          popd
+          pushd site
+          mkdir data; mv ${{ steps.download.outputs.download-path }}/jobs.json data/
+          hugo --minify
+          mv public ../
+          popd
+      - name: Publish
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.DISTBUILD_TOKEN }}
+          publish_dir: ./public

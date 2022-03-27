@@ -1,0 +1,4 @@
+site/public/
+site/resources/
+**/.idea/
+**/.venv/

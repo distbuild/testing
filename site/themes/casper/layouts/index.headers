@@ -1,0 +1,11 @@
+{{/*
+This header file enforces some rules on the website.
+Additionally, it tries to HTTP2 push styles.
+*/}}
+
+{{ $styles := (resources.Get "scss/main.scss") | toCSS | minify }}
+Link: <{{ $styles.RelPermalink }}>; rel=preload; as=style
+{{ if (fileExists "assets/scss/custom.scss") }}
+{{ $styles := (resources.Get "scss/custom.scss") | toCSS | minify }}
+Link: <{{ $styles.RelPermalink }}>; rel=preload; as=style
+{{ end }}

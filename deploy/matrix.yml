@@ -1,0 +1,172 @@
+# Path to the jinja2 templates directory (relative to this file)
+templates_dir: ./template
+
+projects:
+  # Projects are defined as below.
+  # 
+  # # $project_name:
+  # #   filename: $filename      # filename of a jinja2 template file in $templates_dir
+  # #   version_refs:            # A dictionary of all the {{variables}} in the template
+  # #     VARIABLE_NAME:                   # The name of a {{variable}}
+  # #       value: $value                  # The value for the {{variable}}
+  # #       update_function: $function     # A function for updating the value
+  # #       update_args:
+  # #         arg_1: val_1                 # Argument for the update_function
+  # #         arg_2: val_2                 # Argument for the update_function
+  #
+  # When docker-compose yaml is generated, a script reads template yaml from a jinja2
+  # template file, and replaces every instance of {{VARIABLE_NAME}} with the value
+  # defined under VARIABLE_NAME.value.
+  #
+  # Variables should be used to represent things like version numbers, git commit
+  # hashes, or docker tags; ie elements of the docker-compose yaml file which are
+  # expected to change when a new version of the project is released.
+  # 
+  # There is an automated script which can be used to edit matrix.yml (this file). The
+  # script searches the internet to find the most up to date values for each variable.
+  # To configure the script, set a value for "update_function" and some update_args.
+  #
+  # eg:
+  #       BAZEL_VERSION:
+  #         value: 4.0.0
+  #         update_function: get_highest_version_number_tag_from_git_repo
+  #         update_args:
+  #           repo: https://github.com/bazelbuild/bazel.git
+  # 
+  # update_functions are defined in "auto-updater/get_up_to_date_references.py". 
+  # If there is no suitable update function available, either write a new function and
+  # add it to the library, or set "update_function: ". (ie have nothing after the
+  # colon. This is equivalent to "update_function: null")
+  #
+
+
+  ################
+  # Remote Asset #
+  ################
+  remote_asset:
+    filename: compose-remote_asset.jinja2
+    version_refs:
+      REMOTE_ASSET_VERSION:
+        value: 20210514T144202Z-6a6e6f9
+        update_function: get_max_tag_from_docker_hub
+        update_args:
+          repo: buildbarn/bb-remote-asset
+
+  ###########
+  # Clients #
+  ###########
+  bazel:
+    filename: compose-bazel.jinja2
+    version_refs:
+      BAZEL_VERSION:
+        value: 5.0.0
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://github.com/bazelbuild/bazel.git
+  goma:
+    filename: compose-goma.jinja2
+    version_refs:
+      GOMA_CLIENT_GIT_SHA:
+        value: b0064de5f02694595792f4f38b5ec2ae81cf589d
+        update_function: get_latest_commit_hash_from_git_repo
+        update_args:
+          repo: https://chromium.googlesource.com/infra/goma/client.git
+          ref: master
+      GOMA_SERVER_VERSION:
+        value: v0.0.23
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://chromium.googlesource.com/infra/goma/server
+          format_string: v{}\.{}\.{}
+  pants:
+    filename: compose-pants.jinja2
+    version_refs:
+      PANTS_COMMIT:
+        value: 49e386820a95ed8ec943fd0e4667ac98fc0ac2c0
+        update_function: get_latest_commit_hash_from_git_repo
+        update_args:
+          repo: https://github.com/pantsbuild/example-python.git
+          ref: main
+  recc:
+    filename: compose-recc.jinja2
+    version_refs:
+      RECC_VERSION:
+        value: 0.0.52
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/recc.git
+      BUILDBOX_COMMON_VERSION:
+        value: 0.0.54
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildbox/buildbox-common.git
+      BUILDBOX_WORKER_VERSION:
+        value: 0.0.54
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildbox/buildbox-worker.git
+      BUILDBOX_HOST_TOOLS_SHA:
+        value: f953eb90e743e21a68a8027e721471a65670d30c
+        update_function:
+
+  ###########
+  # Servers #
+  ###########
+  buildbarn:
+    filename: compose-buildbarn.jinja2
+    version_refs:
+      BB_STORAGE_VERSION:
+        value: 20211122T093135Z-d8c9c70
+        update_function: get_max_tag_from_docker_hub
+        update_args:
+          repo: buildbarn/bb-storage
+      BB_BROWSER_VERSION:
+        value: 20211009T091310Z-5aa01b9
+        update_function: get_max_tag_from_docker_hub
+        update_args:
+          repo: buildbarn/bb-browser
+      BB_REMOTE_EXECUTION_VERSION:
+        value: 20211122T220607Z-6361c37
+        update_function: get_max_tag_from_docker_hub
+        update_args:
+          repo: buildbarn/bb-scheduler
+  buildfarm:
+    filename: compose-buildfarm.jinja2
+    version_refs:
+      BUILDFARM_VERSION:
+        value: 1.9.2
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://github.com/bazelbuild/bazel-buildfarm.git
+      BUILDFARM_BAZEL_VERSION:
+        value: 4.0.0
+        update_function: get_buildfarm_bazel_version
+        update_args:
+          repo: https://github.com/bazelbuild/bazel-buildfarm.git
+          url_string: https://raw.githubusercontent.com/bazelbuild/bazel-buildfarm/{}/.bazelversion
+  buildgrid:
+    filename: compose-buildgrid.jinja2
+    version_refs:
+      BUILDGRID_VERSION:
+        value: 0.0.30
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildgrid.git
+      BUILDGRID_VERSION_HASH:
+        value: 0b345dde
+        update_function: get_short_hash_for_highest_tag_in_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildgrid.git
+      BUILDBOX_COMMON_VERSION:
+        value: 0.0.54
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildbox/buildbox-common.git
+      BUILDBOX_WORKER_VERSION:
+        value: 0.0.54
+        update_function: get_highest_version_number_tag_from_git_repo
+        update_args:
+          repo: https://gitlab.com/BuildGrid/buildbox/buildbox-worker.git
+      BUILDBOX_HOST_TOOLS_SHA:
+        value: f953eb90e743e21a68a8027e721471a65670d30c
+        update_function:

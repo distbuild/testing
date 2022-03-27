@@ -1,0 +1,42 @@
+baseurl = "https://distbuild.github.io/testing"
+canonifyurls = true
+languageCode = "en-us"
+theme = "casper"
+title = "REAPIs Testing"
+
+[params]
+description = "A compatability matrix between implementations of the Remote-Execution API."
+github = "https://github.com/distbuild/testing"
+mainSections = ["post"]
+
+[menu]
+[[menu.main]]
+identifier = "repository"
+name = "Repository"
+url = "https://github.com/distbuild/testing"
+weight = 10
+
+[params.pipeline]
+# the pipeline that built this site
+id = ""
+url = ""
+
+[params.commit]
+# the pipeline that built this site
+hash = ""
+url = ""
+
+[outputs]
+home = ["HTML", "RSS", "HEADERS"]
+
+[mediaTypes]
+[mediaTypes."text/netlify"]
+delimiter = ""
+suffixes = [""]
+
+[outputFormats]
+[outputFormats.HEADERS]
+baseName = "_headers"
+isPlainText = true
+mediatype = "text/netlify"
+notAlternative = true

@@ -1,0 +1,27 @@
+<nav class="site-nav">
+    <div class="site-nav-left">
+        <a class="site-nav-logo" href="{{ $.Site.BaseURL }}">{{ $.Site.Title }}</a>
+        <div class="site-nav-content">
+            <ul class="nav" role="menu">
+                {{ range $.Site.Menus.main }}
+                <li class="nav-home" role="menuitem"><a href="{{ .URL }}">{{- .Name -}}</a></li>
+                {{ end }}
+                {{if ne .Site.Params.pipeline.id ""}}
+                <li class="nav-home">
+                    {{if ne .Site.Params.pipeline.url ""}}<a href="{{.Site.Params.pipeline.url}}">{{else}}<div>{{end}}
+                    Pipeline #{{.Site.Params.pipeline.id}}
+                    {{if ne .Site.Params.pipeline.url ""}}</a>{{else}}</div>{{end}}
+                </li>
+                {{end}}
+                {{if ne .Site.Params.commit.hash ""}}
+                <li class="nav-home">
+                    {{if ne .Site.Params.commit.url ""}}<a href="{{.Site.Params.commit.url}}">{{else}}<div>{{end}}
+                    Commit <span style="font-family: monospace; font-size: 1.2em;">{{.Site.Params.commit.hash}}</span>
+                    {{if ne .Site.Params.commit.url ""}}</a>{{else}}</div>{{end}}
+                </li>
+                {{end}}
+            </ul>
+        </div>
+    </div>
+</nav>
+

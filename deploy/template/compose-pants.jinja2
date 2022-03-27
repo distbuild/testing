@@ -1,0 +1,17 @@
+version: '3.4'
+services:
+  client:
+    build:
+      context: docker
+      target: pants_client
+      args:
+        PANTS_COMMIT: {{PANTS_COMMIT}}
+    image: pants_client:latest
+    command: >-
+      ./pants --no-pantsd -ldebug
+      --remote-execution
+      --remote-execution-address=grpc://frontend:8980
+      --remote-store-address=grpc://frontend:8980
+      --remote-instance-name=remote-execution
+      --remote-execution-extra-platform-properties=OSFamily=linux
+      test helloworld::
