@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        client: [ bazel ]
-        server: [ buildbarn ]
+        client: [ bazel, goma, pants, recc ]
+        server: [ buildbarn, buildfarm, buildgrid ]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
